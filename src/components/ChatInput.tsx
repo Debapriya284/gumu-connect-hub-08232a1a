@@ -4,17 +4,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string) => Promise<void>;
 }
 
 export const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      onSendMessage(message.trim());
+    if (message.trim() && !isSending) {
+      setIsSending(true);
+      await onSendMessage(message.trim());
       setMessage("");
+      setIsSending(false);
     }
   };
 
@@ -39,7 +42,7 @@ export const ChatInput = ({ onSendMessage }: ChatInputProps) => {
         <Button
           type="submit"
           size="icon"
-          disabled={!message.trim()}
+          disabled={!message.trim() || isSending}
           className="h-[50px] w-[50px] bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-[var(--shadow-glow)] transition-all duration-200 disabled:opacity-50"
         >
           <Send className="h-5 w-5" />
